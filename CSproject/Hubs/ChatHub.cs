@@ -5,7 +5,7 @@ namespace CSproject.Hubs
 {
     public interface IChatClient
     {
-        public Task RecieveMessage(string username, string message , bool isMyMessage);
+        public Task RecieveMessage(string username, string message , string senderUuid);
     }
 
     public record UserConnection(string Username, string ChatRoom , string Uuid);
@@ -44,7 +44,7 @@ namespace CSproject.Hubs
             _Connections.Add(uuid , Context.ConnectionId);
             await Groups.AddToGroupAsync(Context.ConnectionId, chatRoom);
         }
-
+        
         private async void Disconnect(string uuid)
         {
             var chatRoom = _UserConnections[uuid].ChatRoom;
@@ -65,7 +65,7 @@ namespace CSproject.Hubs
             
             await Clients
                 .Group(user.ChatRoom)
-                .RecieveMessage("Admin", $"{user.Username} присоединился к чату!" , false);
+                .RecieveMessage("Admin", $"{user.Username} присоединился к чату!" , "admin");
         }
 
 
@@ -85,7 +85,7 @@ namespace CSproject.Hubs
             {
                 await Clients
                     .Group(connection.ChatRoom)
-                    .RecieveMessage(connection.Username, message , true);
+                    .RecieveMessage(connection.Username, message , uuid);
             }
             else throw new ArgumentException($"{Context.ConnectionId} not in active Connections dict!");
         }
