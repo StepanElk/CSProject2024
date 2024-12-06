@@ -6,6 +6,7 @@ namespace CSproject.Hubs
     public interface IChatClient
     {
         public Task RecieveMessage(string username, string message , string senderUuid);
+        public Task RecieveServerAnswer(bool answer , int errorNumber);
     }
 
     public record UserConnection(string Username, string ChatRoom , string Uuid);
@@ -14,8 +15,10 @@ namespace CSproject.Hubs
 
     public class ChatHub:Hub<IChatClient>
     {
+        //Потом словари заменятся на обращеник к БД
         private static readonly Dictionary<string , UserConnection> _UserConnections = new();
         private static readonly Dictionary<string , string> _Connections = new();
+        private static readonly Dictionary<string, string> _UserLogins = new() {{ "admin" , "1111" }, { "adminHost", "1111" } };
 
 
         public void Connect(string uuid)
@@ -25,7 +28,7 @@ namespace CSproject.Hubs
             {
                 if (!_Connections.ContainsKey(uuid))
                 {
-                    _Connections.Add(Context.ConnectionId , uuid);
+                    _Connections.Add(uuid ,Context.ConnectionId );
                 }
                 else
                 {
@@ -88,6 +91,36 @@ namespace CSproject.Hubs
                     .RecieveMessage(connection.Username, message , uuid);
             }
             else throw new ArgumentException($"{Context.ConnectionId} not in active Connections dict!");
+        }
+
+        public async Task CheckUserLogin(string login , string password)
+        {
+
+            if (!_Connections.ContainsValue(Context.ConnectionId))
+                throw new Exception($"Unknown connection with id {Context.ConnectionId}!");
+
+            var answer = false;
+            var errorNum = 0;
+
+            if (_UserLogins.ContainsKey(login))
+            {
+                if(_UserLogins[login] == password)
+                {
+                    answer = true;
+                }
+                else
+                {
+                    errorNum = 2;
+                }
+            }
+            else
+            {
+                errorNum = 1;
+            }
+
+            await Clients
+                .Client(Context.ConnectionId)
+                .RecieveServerAnswer(answer , errorNum);
         }
     }
 }
