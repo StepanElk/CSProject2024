@@ -1,0 +1,10 @@
+﻿################################################################################
+# Данный GITIGNORE-файл был автоматически создан Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs/CSproject/FileContentIndex
+/.vs/CSproject/v17
+/.vs/CSProject2024
+/.vs/ProjectEvaluation
+/.vs
+/CSproject/obj
