@@ -1,21 +1,17 @@
-﻿namespace CSproject.Domain
+﻿using System.Reflection;
+
+namespace CSproject.Domain
 {
-    public class EventMessage
+    public class EventMessage : BaseMessage
     {
-        public string Sender { get; set; }
-        public bool Status { get; set; }
-        public DateTime SendDate { get; set; }
-        public string Photo { get; set; }
-        public Dictionary<string, bool> Reactions { get; set; }
         public string EventName { get; set; }
         public string EventDescription { get; set; }
         public DateTime EventDate { get; set; }
         public string Location { get; set; }
 
-        public EventMessage(string senderName /*, ... */)
+        public EventMessage(Person sender /* ... */) : base(sender, DateTime.Now /* ... */)
         {
-            Sender = senderName;
-            SendDate = DateTime.Now;
+            /* ... */
         }
     }
 }
