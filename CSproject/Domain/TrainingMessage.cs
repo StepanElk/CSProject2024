@@ -1,4 +1,4 @@
-﻿namespace CSproject.Domain
+﻿namespace CSproject
 {
     public class TrainingMessage
     {
