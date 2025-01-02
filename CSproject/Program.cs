@@ -1,8 +1,15 @@
-using CSproject.Hubs;
-using Microsoft.Extensions.Caching.Memory;
+using CSproject.Application.Hubs;
+using CSproject.Domain;
+using CSproject.Infrastructure;
+using Ninject;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddMemoryCache();
+
+//DI контейнер ASP 
+builder.Services.AddTransient(typeof(UserRepository), typeof(UserRepository));
+builder.Services.AddTransient(typeof(EFContext), typeof(EFContext));
+builder.Services.AddTransient(typeof(ConnectionsRepository), typeof(ConnectionsRepository));
 
 builder.Services.AddCors(options =>
 {
