@@ -15,15 +15,15 @@ namespace CSproject.Infrastructure
             _db = db;
         }
 
-        public async void  Add(User person)
+        public void  SignUp(User person)
         {
             if (person == null)
             {
                 throw new ArgumentNullException(nameof(person));
             }
 
-            await _db.Users.AddAsync(person);
-            await _db.SaveChangesAsync();
+             _db.Users.Add(person);
+             _db.SaveChanges();
         }
 
         public async Task<List<User>> GetList()
@@ -37,18 +37,23 @@ namespace CSproject.Infrastructure
             await _db.SaveChangesAsync();
         }
 
-        public CheckUserAnswers CheckUser(string login , string pasword)
+        public TryLoginAnswers CheckUser(string login , string pasword)
         {
             User? user = _db.Users.FirstOrDefault(x => x.Login == login);
 
             if (user is not  null)
             {
                 return user.Password == pasword 
-                    ? CheckUserAnswers.Ok 
-                    : CheckUserAnswers.WrongPassword;
+                    ? TryLoginAnswers.Ok 
+                    : TryLoginAnswers.WrongPassword;
             }
 
-            return CheckUserAnswers.WrongLogin;
+            return TryLoginAnswers.WrongLogin;
+        }
+
+        public bool IsUserExist(string login)
+        {
+            return _db.Users.FirstOrDefault(x => x.Login == login) is not null;
         }
     }
 }

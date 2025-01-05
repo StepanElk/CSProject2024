@@ -59,7 +59,6 @@ namespace CSproject.Infrastructure
         public void LoginUser(string login ,string uuid)
         {
             var connection = _db.Connections.FirstOrDefault(x => x.Uuid == uuid);
-            //Console.WriteLine(connection);
             connection.User = _db.Users.FirstOrDefault(x => x.Login == login);
             _db.SaveChanges();
         }

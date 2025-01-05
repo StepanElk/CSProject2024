@@ -8,6 +8,8 @@ namespace CSproject.Infrastructure
     {
         public DbSet<User> Users => Set<User>();
         public DbSet<Connection> Connections => Set<Connection>();
+        public DbSet<Message> Messages => Set<Message>();
+
 
         public EFContext(){
             //На время разработки 
@@ -23,8 +25,8 @@ namespace CSproject.Infrastructure
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>().HasData(
-                    new User {  Name = "Admin", Gender = "m" , Login = "admin" , Password = "1111" },
-                    new User {  Name = "AdminHost", Gender = "m", Login = "adminHost", Password = "1111" }
+                    new User {  Name = "Admin", Sex = "m" , Login = "admin" , Password = "1111" },
+                    new User {  Name = "AdminHost", Sex = "m", Login = "adminHost", Password = "1111" }
             );
         }
     }

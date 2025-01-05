@@ -1,18 +1,12 @@
-﻿using System.Reflection;
-
-namespace CSproject.Domain
+﻿namespace CSproject.Domain
 {
     //Entity ?
-    public class EventMessage : BaseMessage
+    public class EventMessage : Message
     {
         public string EventName { get; set; }
         public string EventDescription { get; set; }
         public DateTime EventDate { get; set; }
-        public string Location { get; set; }
+        public string? Location { get; set; }
 
-        public EventMessage(User sender /* ... */) : base(sender, DateTime.Now /* ... */)
-        {
-            /* ... */
-        }
     }
 }

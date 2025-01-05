@@ -1,6 +1,6 @@
 ﻿namespace CSproject.Infrastructure
 {
-    public enum CheckUserAnswers
+    public enum TryLoginAnswers
     {
         Ok ,
         WrongLogin,

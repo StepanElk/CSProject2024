@@ -10,6 +10,8 @@ builder.Services.AddMemoryCache();
 builder.Services.AddTransient(typeof(UserRepository), typeof(UserRepository));
 builder.Services.AddTransient(typeof(EFContext), typeof(EFContext));
 builder.Services.AddTransient(typeof(ConnectionsRepository), typeof(ConnectionsRepository));
+builder.Services.AddTransient(typeof(MessagesRepository), typeof(MessagesRepository));
+
 
 builder.Services.AddCors(options =>
 {

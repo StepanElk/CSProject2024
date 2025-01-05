@@ -9,7 +9,7 @@ namespace CSproject.Domain
         [Key]
         public string Login { get;  set; }
         public string Name { get;  set; }
-        public string Gender { get;  set; }
+        public string Sex { get;  set; }
         public string Password { get;  set; }
 
     }

@@ -6,20 +6,28 @@ namespace CSproject.Application.Hubs
 {
     public interface IChatClient
     {
-        public Task RecieveMessage(string username, string message, string senderUuid);
+        public Task RecieveMessage(string json);
         public Task RecieveServerAnswer( int answer );
+        public Task RecieveChatMessages(string json);
     }
 
     public class ChatHub : Hub<IChatClient>
     {
         private readonly UserRepository _userRepository;
         private readonly ConnectionsRepository _connectionsRepository;
+        private readonly MessagesRepository _messagesRepository;
 
 
-        public ChatHub(UserRepository userRepository , ConnectionsRepository connectionsRepository)
+
+        public ChatHub(
+            UserRepository userRepository ,
+            ConnectionsRepository connectionsRepository , 
+            MessagesRepository messagesRepository
+            )
         {
             _userRepository = userRepository;
             _connectionsRepository = connectionsRepository;
+            _messagesRepository = messagesRepository;
         }
 
         public void Connect(string uuid)
@@ -52,38 +60,41 @@ namespace CSproject.Application.Hubs
         {
             var connection = _connectionsRepository.GetConnectionByUuid(uuid);
             await Groups.AddToGroupAsync(Context.ConnectionId, connection.Chatroom);
-
-            await Clients
-                .Group(connection.Chatroom)
-                .RecieveMessage("Admin", $"{connection.User.Name} присоединился к чату!", "admin");
         }
 
 
-        public async Task SendMessage(string message, string uuid)
+        public async Task SendMessage(string content, string uuid)
         {
             Connection connection;
 
             if (_connectionsRepository.IsConnected(uuid))
                 connection = _connectionsRepository.GetConnectionByUuid(uuid);
-            else throw new ArgumentException($"{uuid} not in connections repository! ");
+            else throw new ArgumentException($"{uuid} not in connections repository!");
 
 
             if (connection is not null)
             {
+                var message = _messagesRepository.RegisterSendedMessage(content, uuid);
                 await Clients
                     .Group(connection.Chatroom)
-                    .RecieveMessage(connection.User.Name, message, uuid);
+                    .RecieveMessage(message);
             }
             else throw new ArgumentException($"{Context.ConnectionId} not active Connection!");
         }
 
+        public async void LoadMessages(string uuid)
+        {
+            var login = _connectionsRepository.GetUserByUuid(uuid).Login;
+            var json = _messagesRepository.GetMessages(login);
+            await Clients
+                .Client(Context.ConnectionId)
+                .RecieveChatMessages(json);
+        }
+
         public async Task TryAuthorise(string login, string password , string uuid )
         {
-            //if (!_Connections.ContainsValue(Context.ConnectionId))
-            //    throw new Exception($"Unknown connection with id {Context.ConnectionId}!");
-
             var answer = _userRepository.CheckUser(login, password);
-            if (answer == CheckUserAnswers.Ok)
+            if (answer == TryLoginAnswers.Ok)
                  _connectionsRepository.LoginUser(login, uuid);
 
             await Clients
@@ -91,7 +102,33 @@ namespace CSproject.Application.Hubs
                 .RecieveServerAnswer((int)answer);
         }
 
-        //public async Task TrySignUp() { }
+        public async Task TrySignUp(string login , string uuid,string name ,  string codeword , string sex , string password){
+
+            var  answer = TrySignUpAnswers.Ok;
+            if (_userRepository.IsUserExist(login))
+                answer = TrySignUpAnswers.WrongLogin;
+            else if(! _userRepository.IsUserExist(codeword))
+                answer = TrySignUpAnswers.WrongCodeword;
+
+            if (answer == TrySignUpAnswers.Ok)
+            {
+                _userRepository.SignUp(
+                    new User { Name = name , Login = login , Sex = sex , Password = password});
+                _connectionsRepository.LoginUser(login, uuid);
+
+                var connection = _connectionsRepository.GetConnectionByUuid(uuid);
+                var message = _messagesRepository
+                .RegisterSendedMessage($"{connection.User.Name} присоединился к чату!", uuid, "admin");
+
+                await Clients
+                .Group(connection.Chatroom)
+                    .RecieveMessage(message);
+            }
+
+            await Clients
+                .Client(Context.ConnectionId)
+                .RecieveServerAnswer((int)answer);
+        }
     }
 }
 
