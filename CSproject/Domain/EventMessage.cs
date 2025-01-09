@@ -5,7 +5,7 @@
     {
         public string EventName { get; set; }
         public string EventDescription { get; set; }
-        public DateTime EventDate { get; set; }
+        public DateOnly EventDate { get; set; }
         public string? Location { get; set; }
 
     }

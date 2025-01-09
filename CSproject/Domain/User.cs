@@ -12,6 +12,8 @@ namespace CSproject.Domain
         public string Sex { get;  set; }
         public string Password { get;  set; }
 
+        public string Photo { get; set; }
+
     }
 }
 

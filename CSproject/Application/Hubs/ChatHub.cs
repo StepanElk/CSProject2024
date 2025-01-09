@@ -6,7 +6,7 @@ namespace CSproject.Application.Hubs
 {
     public interface IChatClient
     {
-        public Task RecieveMessage(string json);
+        public Task RecieveMessage(string json , string uuid);
         public Task RecieveServerAnswer( int answer );
         public Task RecieveChatMessages(string json);
     }
@@ -77,7 +77,7 @@ namespace CSproject.Application.Hubs
                 var message = _messagesRepository.RegisterSendedMessage(content, uuid);
                 await Clients
                     .Group(connection.Chatroom)
-                    .RecieveMessage(message);
+                    .RecieveMessage(message , uuid);
             }
             else throw new ArgumentException($"{Context.ConnectionId} not active Connection!");
         }
@@ -102,7 +102,14 @@ namespace CSproject.Application.Hubs
                 .RecieveServerAnswer((int)answer);
         }
 
-        public async Task TrySignUp(string login , string uuid,string name ,  string codeword , string sex , string password){
+        public async Task TrySignUp(
+            string login , 
+            string uuid,
+            string name ,
+            string codeword ,
+            string sex , 
+            string password ,
+            string photo){
 
             var  answer = TrySignUpAnswers.Ok;
             if (_userRepository.IsUserExist(login))
@@ -113,7 +120,7 @@ namespace CSproject.Application.Hubs
             if (answer == TrySignUpAnswers.Ok)
             {
                 _userRepository.SignUp(
-                    new User { Name = name , Login = login , Sex = sex , Password = password});
+                    new User { Name = name , Login = login , Sex = sex , Password = password ,Photo = photo});
                 _connectionsRepository.LoginUser(login, uuid);
 
                 var connection = _connectionsRepository.GetConnectionByUuid(uuid);
@@ -122,12 +129,31 @@ namespace CSproject.Application.Hubs
 
                 await Clients
                 .Group(connection.Chatroom)
-                    .RecieveMessage(message);
+                    .RecieveMessage(message, uuid);
             }
 
             await Clients
                 .Client(Context.ConnectionId)
                 .RecieveServerAnswer((int)answer);
+        }
+        public async Task PostEvent(
+            string uuid ,
+            string name , 
+            string description ,
+            string location,
+            string date ,
+            string photo)
+        {
+            var covertedDate = new DateOnly(
+                int.Parse( date.Split('-')[0]),
+                int.Parse(date.Split('-')[1]),
+                int.Parse(date.Split('-')[2]));
+
+            var connection = _connectionsRepository.GetConnectionByUuid(uuid);
+            var message = _messagesRepository.RegisterNewEvent(uuid,name,description,location, covertedDate, photo);
+            await Clients
+                .Group(connection.Chatroom)
+                .RecieveMessage(message, uuid);
         }
     }
 }

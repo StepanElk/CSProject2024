@@ -2,6 +2,7 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using System;
+using Ninject.Activation;
 
 namespace CSproject.Infrastructure
 {
@@ -34,15 +35,46 @@ namespace CSproject.Infrastructure
             _db.SaveChanges();
             message.IsMine = login is null;
             message.UserName = user.Name;
+            message.UserPhoto = user.Photo;
             return JsonSerializer.Serialize(message); 
         }
-
+        
         public string GetMessages(string login)
         {
+            //Все сообщения приводятся к базовому классу.Не отображаются корректно мероприятия тк нет полей
             var messages = _db.Messages.Include(x => x.User).ToList();
-            messages.ForEach(x => {x.IsMine = x.User.Login == login; x.UserName = x.User.Name; }) ;
+            //Console.WriteLine(messages.Count);
+            messages.ForEach(x => {x.IsMine = x.User.Login == login; x.UserName = x.User.Name; x.UserPhoto = x.User.Photo; }) ;
             return JsonSerializer.Serialize(messages);
-            
+        }
+
+        public string RegisterNewEvent(
+            string uuid,
+            string name,
+            string description,
+            string location,
+            DateOnly date,
+            string photo)
+        {
+            var user = _db.Connections.Include(x => x.User).FirstOrDefault(x => x.Uuid == uuid).User;
+            var message = new EventMessage
+            {
+                EventName = name,
+                EventDescription = description,
+                Location = location,
+                Photo = photo,
+                EventDate = date,
+                SendDate = DateTime.Now,
+                User = user,
+                Status = true,
+                Type = "event"
+            };
+            _db.EventMessages.Add(message);
+
+            _db.SaveChanges();
+            message.UserName = user.Name;
+            message.UserPhoto = user.Photo;
+            return JsonSerializer.Serialize(message);
         }
     }
 }

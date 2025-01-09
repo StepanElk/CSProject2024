@@ -5,7 +5,7 @@
     {
         public string TrainingName { get; set; }
         public string TrainingDescription { get; set; }
-        public string TrainingDuration { get; set; }
-        public double Callories { get; set; }
+        public int TrainingDuration { get; set; }
+        public int Callories { get; set; }
     }
 }
