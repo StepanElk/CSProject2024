@@ -2,7 +2,7 @@
 
 namespace CSproject.Domain
 {
-    public class UserName : ValueType<UserName>
+    public class UserName
     {
         public UserName(string firstName, string lastName)
         {

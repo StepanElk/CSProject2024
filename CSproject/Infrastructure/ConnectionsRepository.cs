@@ -1,4 +1,5 @@
 ﻿using CSproject.Domain;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace CSproject.Infrastructure

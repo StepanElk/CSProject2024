@@ -1,7 +1,6 @@
 using CSproject.Application.Hubs;
 using CSproject.Domain;
 using CSproject.Infrastructure;
-using Ninject;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddMemoryCache();
