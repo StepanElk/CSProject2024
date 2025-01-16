@@ -2,6 +2,7 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Text.Encodings.Web;
 
 namespace CSproject.Infrastructure
 {
@@ -40,11 +41,17 @@ namespace CSproject.Infrastructure
         
         public string GetMessages(string login)
         {
-            //Все сообщения приводятся к базовому классу.Не отображаются корректно мероприятия тк нет полей
             var messages = _db.Messages.Include(x => x.User).ToList();
-            //Console.WriteLine(messages.Count);
-            messages.ForEach(x => {x.IsMine = x.User.Login == login; x.UserName = x.User.Name; x.UserPhoto = x.User.Photo; }) ;
-            return JsonSerializer.Serialize(messages);
+
+            messages.ForEach(x => {
+                x.IsMine = x.User.Login == login;
+                x.UserName = x.User.Name;
+                x.UserPhoto = x.User.Photo; 
+            }) ;
+
+            _db.SaveChanges();
+            List<object> objects = _db.Messages.Include(x => x.User).Cast<object>().ToList();
+            return  JsonSerializer.Serialize<object>(objects);
         }
 
         public string RegisterNewEvent(
