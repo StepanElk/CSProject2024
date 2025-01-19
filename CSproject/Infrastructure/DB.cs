@@ -11,6 +11,8 @@ namespace CSproject.Infrastructure
         public DbSet<Message> Messages => Set<Message>();
 
         public DbSet<EventMessage> EventMessages => Set<EventMessage>();
+        public DbSet<TrainingMessage> TrainMessages => Set<TrainingMessage>();
+
 
         public EFContext(){
             //На время разработки 

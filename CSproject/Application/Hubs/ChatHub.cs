@@ -17,8 +17,6 @@ namespace CSproject.Application.Hubs
         private readonly ConnectionsRepository _connectionsRepository;
         private readonly MessagesRepository _messagesRepository;
 
-
-
         public ChatHub(
             UserRepository userRepository ,
             ConnectionsRepository connectionsRepository , 
@@ -47,14 +45,6 @@ namespace CSproject.Application.Hubs
 
             await Groups.AddToGroupAsync(Context.ConnectionId, oldConnection.Chatroom);
         }
-
-        //public async void Disconnect(string uuid)
-        //{
-        //    var chatRoom = _UserConnections[uuid].ChatRoom;
-        //    _UserConnections.Remove(uuid);
-        //    await Groups.RemoveFromGroupAsync(_Connections[uuid], chatRoom);
-        //    _Connections.Remove(uuid);
-        //}
 
         public async Task JoinChat(string uuid)
         {
@@ -125,7 +115,7 @@ namespace CSproject.Application.Hubs
 
                 var connection = _connectionsRepository.GetConnectionByUuid(uuid);
                 var message = _messagesRepository
-                .RegisterSendedMessage($"{connection.User.Name} присоединился к чату!", uuid, "admin");
+                    .RegisterSendedMessage($"{connection.User.Name} присоединился к чату!", uuid, "admin");
 
                 await Clients
                 .Group(connection.Chatroom)
@@ -136,6 +126,7 @@ namespace CSproject.Application.Hubs
                 .Client(Context.ConnectionId)
                 .RecieveServerAnswer((int)answer);
         }
+
         public async Task PostEvent(
             string uuid ,
             string name , 
@@ -151,6 +142,21 @@ namespace CSproject.Application.Hubs
 
             var connection = _connectionsRepository.GetConnectionByUuid(uuid);
             var message = _messagesRepository.RegisterNewEvent(uuid,name,description,location, covertedDate, photo);
+            await Clients
+                .Group(connection.Chatroom)
+                .RecieveMessage(message, uuid);
+        }
+
+        public async Task PostTrain(
+            string uuid ,
+            string name,
+            string description,
+            int duration,
+            int calories,
+            string photo)
+        {
+            var connection = _connectionsRepository.GetConnectionByUuid(uuid);
+            var message = _messagesRepository.RegisterNewTrain(uuid, name,description, duration,calories,photo);
             await Clients
                 .Group(connection.Chatroom)
                 .RecieveMessage(message, uuid);

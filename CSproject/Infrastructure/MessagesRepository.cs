@@ -3,6 +3,8 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Text.Encodings.Web;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Xml.Linq;
 
 namespace CSproject.Infrastructure
 {
@@ -47,7 +49,7 @@ namespace CSproject.Infrastructure
                 x.IsMine = x.User.Login == login;
                 x.UserName = x.User.Name;
                 x.UserPhoto = x.User.Photo; 
-            }) ;
+            });
 
             _db.SaveChanges();
             List<object> objects = _db.Messages.Include(x => x.User).Cast<object>().ToList();
@@ -76,6 +78,36 @@ namespace CSproject.Infrastructure
                 Type = "event"
             };
             _db.EventMessages.Add(message);
+
+            _db.SaveChanges();
+            message.UserName = user.Name;
+            message.UserPhoto = user.Photo;
+            return JsonSerializer.Serialize(message);
+        }
+
+        public string RegisterNewTrain(
+            string uuid, 
+            string name,
+            string description,
+            int duration ,
+            int calories,
+            string photo)
+        {
+            var user = _db.Connections.Include(x => x.User).FirstOrDefault(x => x.Uuid == uuid).User;
+
+            var message = new TrainingMessage
+            {
+                TrainingName = name,
+                TrainingDescription = description,
+                TrainingDuration = duration,
+                Calories = calories,
+                Photo = photo,
+                SendDate = DateTime.Now,
+                User = user,
+                Status = true,
+                Type = "train"
+            };
+            _db.TrainMessages.Add(message);
 
             _db.SaveChanges();
             message.UserName = user.Name;
